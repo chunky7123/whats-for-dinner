@@ -1,0 +1,30 @@
+{
+  "name": "What Shall We Have for Dinner",
+  "short_name": "Dinner",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff6f0",
+  "theme_color": "#ff6b35",
+  "icons": [
+    {
+      "src": "icons/free_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/free_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/guru_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/guru_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

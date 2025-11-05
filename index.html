@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>What Shall We Have for Dinner</title>
+  <meta name="description" content="Enter your ingredients and get recipe ideas. Unlock Guru for healthy dual-mode recipes." />
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root{
+      --free-grad-start: #ff8a00;
+      --free-grad-end: #ffd100;
+      --guru-grad-start: #fffaf0;
+      --guru-grad-end: #fff7e6;
+      --card:#ffffff;
+      --muted:#444;
+      --accent:#ff6b35;
+      --guru-gold:#ffd700;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      margin:0;background:linear-gradient(180deg,var(--free-grad-start),var(--free-grad-end));
+      color:#222;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+    .guru-theme body{ background: linear-gradient(180deg,var(--guru-grad-start),var(--guru-grad-end)); }
+    .app{width:100%;max-width:980px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+    .logo{width:70px;height:70px;border-radius:20px;background:linear-gradient(135deg,var(--accent),#ffb400);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,0.15)}
+    .logo img{width:44px;height:44px}
+    h1{margin:0;font-size:24px;font-weight:800}
+    p.lead{margin:0;color:#444;font-size:14px}
+    .card{background:var(--card);padding:18px;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,0.08)}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    @media(max-width:880px){.grid{grid-template-columns:1fr}}
+    label{font-size:14px;color:#444;display:block;margin-bottom:6px;font-weight:600}
+    textarea,input{width:100%;padding:10px;border-radius:10px;border:1px solid #eee;background:#fafafa;color:#222;}
+    .controls{display:flex;gap:10px;margin-top:10px;align-items:center}
+    button{background:var(--accent);border:none;padding:10px 14px;border-radius:12px;font-weight:700;color:#fff;cursor:pointer}
+    .small{background:#fff;border:2px solid var(--accent);color:var(--accent);padding:8px 10px;border-radius:10px}
+    .results{margin-top:14px}
+    .recipe{padding:12px;border-radius:12px;margin-bottom:12px;background:#fff6f0;border:1px solid #ffe6cc;display:flex;gap:12px;align-items:flex-start}
+    .pill{font-size:12px;padding:6px 8px;border-radius:999px;background:#ffb400;color:#fff;font-weight:700}
+    .muted{color:#666;font-size:13px}
+    .missing{color:#e63946;font-weight:700}
+    .banner{margin:14px 0;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#ffb400);color:#fff;display:flex;justify-content:space-between;align-items:center}
+    .guru-badge{background:linear-gradient(90deg,var(--guru-gold),#ffcf40);color:#1a1a1a;padding:6px 10px;border-radius:999px;font-weight:800;display:inline-flex;align-items:center;gap:8px;box-shadow:0 6px 20px rgba(255,215,0,0.18)}
+    .guru-glow{box-shadow:0 10px 30px rgba(255,215,0,0.15)}
+    /* ad placeholder */
+    .ad-banner{height:60px;border-radius:8px;background:linear-gradient(90deg,#fff,#fff6e6);display:flex;align-items:center;justify-content:center;color:#666;border:1px dashed #ffdca4;margin-top:12px}
+    footer{margin-top:14px;color:#666;font-size:13px;text-align:center}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(10,10,10,0.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999}
+    .modal{width:100%;max-width:900px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:700px){.two-col{grid-template-columns:1fr}}
+    .col{background:#fff6f0;padding:12px;border-radius:10px;border:1px solid #ffe6cc}
+    .upgrade-cta{background:linear-gradient(90deg,var(--guru-gold),#ffcf40);border:none;color:#1a1a1a;padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main class="app" id="appRoot">
+    <header>
+      <div class="logo" aria-hidden="true">
+        <img src="icons/free_icon_192.png" alt="app icon">
+      </div>
+      <div>
+        <h1>What Shall We Have for Dinner</h1>
+        <p class="lead">Enter your ingredients and discover recipes — free online search + Guru healthy versions.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <div>
+          <label for="ingredients">Ingredients you have (comma or newline separated)</label>
+          <textarea id="ingredients" rows="5" placeholder="eg: eggs, milk, tomato, garlic, chicken"></textarea>
+          <div class="controls">
+            <button id="findBtn">Find recipes</button>
+            <button class="small" id="clearBtn">Clear</button>
+            <button class="small" id="sampleBtn">Use sample pantry</button>
+            <div style="margin-left:auto" id="guruStatus"></div>
+          </div>
+
+          <div class="banner">
+            <div>
+              <div style="font-weight:700;font-size:15px">Want Guru-level cooking?</div>
+              <div style="font-size:13px">Become a Dinner Guru to unlock Dual Mode (Standard + Healthy), exclusive tips, and an ad-free experience.</div>
+            </div>
+            <div class="guru-badge">New</div>
+          </div>
+
+          <div class="results" id="results" aria-live="polite"></div>
+
+          <div class="ad-banner" id="adBanner">Ad placeholder — goes away for Guru users</div>
+
+        </div>
+
+        <aside>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <div class="muted">Saved recipes</div>
+              <div style="font-weight:700;color:#1a1a1a">Favorites</div>
+            </div>
+            <div>
+              <button class="small" id="clearFavs">Clear</button>
+            </div>
+          </div>
+
+          <div class="card favorites" id="favList" style="padding:10px;overflow:auto;max-height:420px;background:#fafafa;border:1px solid #eee"></div>
+
+          <div style="margin-top:12px">
+            <div class="muted">Shopping list</div>
+            <div id="shopping" style="margin-top:8px;padding:10px;border-radius:10px;background:#fff6f0;border:1px solid #ffd5b0"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="small" id="exportList">Export</button>
+              <button class="small" id="clearList">Clear</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <footer>
+        This app runs in your browser — save to your home screen for a full mobile experience.
+      </footer>
+    </section>
+  </main>
+
+  <div id="modalRoot" style="display:none"></div>
+
+<script>
+/* -------- Data & mappings -------- */
+const RECIPES = [
+  { id:1, name:'Tomato Omelette', ingredients:['eggs','tomato','salt','pepper','onion'], steps:['Beat eggs','Fry onion & tomato','Add eggs and cook'] },
+  { id:2, name:'Garlic Butter Pasta', ingredients:['pasta','garlic','butter','salt','parmesan'], steps:['Boil pasta','Saute garlic in butter','Mix together and top with parmesan'] },
+  { id:3, name:'Chicken Stir Fry', ingredients:['chicken','soy sauce','garlic','vegetable oil','mixed vegetables','salt'], steps:['Cut chicken','Stir fry with garlic & veg','Add soy sauce'] },
+  { id:4, name:'Vegetable Soup', ingredients:['carrot','celery','onion','potato','salt','water'], steps:['Chop veg','Boil until tender','Season to taste'] },
+  { id:5, name:'Grilled Cheese Sandwich', ingredients:['bread','cheese','butter'], steps:['Butter bread','Place cheese between slices','Grill until golden'] },
+  { id:6, name:'Pancakes', ingredients:['flour','milk','egg','butter','baking powder','salt'], steps:['Mix batter','Fry small pancakes','Serve with toppings'] },
+  { id:7, name:'Tomato Pasta', ingredients:['pasta','tomato','garlic','olive oil','salt'], steps:['Cook pasta','Make tomato sauce with garlic','Combine and serve'] }
+];
+
+const SUBS = {
+  'milk': ['water','plant milk'],
+  'butter': ['olive oil','margarine'],
+  'parmesan': ['any hard cheese','nutritional yeast'],
+  'chicken': ['tofu','mushroom'],
+  'eggs': ['mashed banana (baking)','flax egg (1tbsp flax + 3tbsp water)']
+};
+
+const HEALTHY = {
+  'butter': 'olive oil',
+  'parmesan': 'grated low-fat cheese',
+  'pasta': 'whole wheat pasta',
+  'flour': 'whole wheat flour',
+  'milk': 'skim milk',
+  'sugar': 'less sugar or natural sweetener',
+  'oil': 'olive oil',
+  'bread': 'whole grain bread',
+  'cheese': 'low-fat cheese',
+  'chicken': 'skinless chicken breast',
+  'egg': 'egg white',
+  'eggs': 'egg whites',
+  'salt': 'reduced salt'
+};
+
+/* -------- DOM -------- */
+const ingredientsEl = document.getElementById('ingredients');
+const findBtn = document.getElementById('findBtn');
+const resultsEl = document.getElementById('results');
+const favListEl = document.getElementById('favList');
+const shoppingEl = document.getElementById('shopping');
+const modalRoot = document.getElementById('modalRoot');
+const guruStatusEl = document.getElementById('guruStatus');
+const adBanner = document.getElementById('adBanner');
+const appRoot = document.getElementById('appRoot');
+
+/* -------- Helpers -------- */
+function normalizeList(text){
+  return text.split(/[\n,]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+}
+function scoreRecipe(pantry, recipe){
+  const have = recipe.ingredients.filter(i => pantry.includes(i));
+  const missing = recipe.ingredients.filter(i => !pantry.includes(i));
+  const score = Math.round((have.length/recipe.ingredients.length)*100);
+  return {have,missing,score};
+}
+function makeHealthyVersion(recipe){
+  const healthyIngredients = recipe.ingredients.map(i => {
+    if(HEALTHY[i]) return HEALTHY[i];
+    for(const k in HEALTHY){ if(i.includes(k)) return HEALTHY[k]; }
+    return i;
+  });
+  const healthySteps = recipe.steps.map(step => {
+    let s = step;
+    for(const k in HEALTHY){
+      const re = new RegExp('\\b'+k+'\\b','gi');
+      s = s.replace(re, HEALTHY[k]);
+    }
+    s = s.replace(/fry/gi, 'lightly sauté or bake');
+    return s;
+  });
+  return {...recipe, ingredients: healthyIngredients, steps: healthySteps};
+}
+
+/* -------- Rendering & Local data -------- */
+function renderRecipes(pantry){
+  resultsEl.innerHTML = '';
+  // show local recipes first
+  const local = RECIPES.map(r=>({...r,...scoreRecipe(pantry,r)})).sort((a,b)=>b.score-a.score);
+  if(local.length){
+    const header = document.createElement('div'); header.innerHTML = '<div style="font-weight:800;margin-bottom:8px">Local recipes (offline)</div>';
+    resultsEl.appendChild(header);
+    local.forEach(r=> resultsEl.appendChild(renderRecipeCard(r)));
+  }
+  // then online results area placeholder (will populate when user searches online)
+  const onlineHeader = document.createElement('div'); onlineHeader.style.marginTop='8px';
+  onlineHeader.innerHTML = '<div style="font-weight:800;margin-bottom:8px">Online recipes</div><div id="onlineResults" class="muted">Search to load online recipes from TheMealDB</div>';
+  resultsEl.appendChild(onlineHeader);
+}
+
+function renderRecipeCard(r){
+  const div = document.createElement('div');
+  div.className='recipe';
+  div.innerHTML = `
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">${r.name}</div>
+        <div class="pill">Match ${r.score || 0}%</div>
+      </div>
+      <div class="muted" style="margin-top:6px">Ingredients: ${r.ingredients.join(', ')}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="small" data-action="view" data-id="${r.id}">View</button>
+        <button class="small" data-action="fav" data-id="${r.id}">Save</button>
+        <button class="small" data-action="addMissing" data-id="${r.id}">Add missing to list</button>
+      </div>
+      <div style="margin-top:8px">${r.missing && r.missing.length ? '<span class="missing">Missing: '+r.missing.join(', ')+'</span>' : '<span class="muted">You have everything for this</span>'}</div>
+    </div>
+  `;
+  return div;
+}
+
+function loadFavs(){ const raw = localStorage.getItem('wswhd_favs'); return raw ? JSON.parse(raw) : []; }
+function saveFavs(favs){ localStorage.setItem('wswhd_favs', JSON.stringify(favs)); }
+function renderFavs(){ const favs = loadFavs(); favListEl.innerHTML=''; if(!favs.length) return favListEl.innerHTML='<div class="muted">No saved recipes yet.</div>'; favs.forEach(id=>{ const r = RECIPES.find(x=>x.id===id); if(!r) return; const d = document.createElement('div'); d.style.padding='8px'; d.style.borderBottom='1px solid rgba(0,0,0,0.03)'; d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${r.name}</strong><div class="muted" style="font-size:12px">Ingredients: ${r.ingredients.join(', ')}</div></div><div><button class="small" data-action="removeFav" data-id="${r.id}">Remove</button></div></div>`; favListEl.appendChild(d); }); }
+
+function addMissingToShopping(id, pantry){ const r = RECIPES.find(x=>x.id===id); if(!r) return; const missing = r.ingredients.filter(i=>!pantry.includes(i)); const cur = JSON.parse(localStorage.getItem('wswhd_shopping')||'[]'); const merged = Array.from(new Set([...cur,...missing])); localStorage.setItem('wswhd_shopping', JSON.stringify(merged)); renderShopping(); }
+function renderShopping(){ const list = JSON.parse(localStorage.getItem('wswhd_shopping')||'[]'); if(!list.length) return shoppingEl.innerHTML='<div class="muted">No items in shopping list.</div>'; shoppingEl.innerHTML = '<ul style="margin:0;padding-left:18px">' + list.map(it=>'<li>'+it+'</li>').join('') + '</ul>'; }
+
+/* -------- Modal & Guru flow -------- */
+function openRecipeModal(id, pantry, onlineMeal){
+  let r;
+  if(onlineMeal){
+    r = onlineMeal;
+    // online meals have idMeal and strMeal etc. normalize
+    r = { id: r.idMeal, name: r.strMeal, ingredients: extractIngredientsFromMeal(r), steps: [r.strInstructions || 'See full recipe online'] };
+  } else {
+    r = RECIPES.find(x=>x.id===id);
+  }
+  const healthy = makeHealthyVersion(r);
+  const isGuru = !!localStorage.getItem('wswhd_guru');
+  modalRoot.style.display='block';
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop" id="backdrop">
+      <div class="modal guru-glow">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2>${r.name}</h2>
+          ${isGuru ? '<div class="guru-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2l2.5 5L20 8l-4 3 1 6L12 15l-5 2 1-6L4 8l5.5-.5L12 2z" fill="#1a1a1a"/></svg> Guru</div>' : '<div class="guru-badge" style="opacity:0.85"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2l2.5 5L20 8l-4 3 1 6L12 15l-5 2 1-6L4 8l5.5-.5L12 2z" fill="#1a1a1a"/></svg> Guru</div>'}
+        </div>
+
+        <div class="two-col">
+          <div class="col">
+            <div style="font-weight:800;margin-bottom:6px">Standard</div>
+            <div class="muted" style="margin-bottom:6px">Ingredients: ${r.ingredients.join(', ')}</div>
+            <div style="font-weight:700;margin-bottom:6px">Steps</div>
+            <ol>${r.steps.map(s=>'<li>'+s+'</li>').join('')}</ol>
+          </div>
+
+          <div class="col" id="healthyCol">
+            ${isGuru ? (`<div style="font-weight:800;margin-bottom:6px">👑 Healthy (Guru)</div>
+            <div class="muted" style="margin-bottom:6px">Ingredients: ${healthy.ingredients.join(', ')}</div>
+            <div style="font-weight:700;margin-top:6px">Steps</div>
+            <ol>${healthy.steps.map(s=>'<li>'+s+'</li>').join('')}</ol>`) : (`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px">
+              <div style="font-size:18px;font-weight:800">👑 Become a Dinner Guru</div>
+              <div class="muted">Unlock the healthy version, exclusive tips, and an ad-free experience.</div>
+              <button class="upgrade-cta" id="upgradeBtn">Become a Guru</button>
+            </div>`)}
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+          <button class="small" id="closeModal">Close</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('backdrop').addEventListener('click', (e)=>{ if(e.target.id==='backdrop') closeModal(); });
+  const up = document.getElementById('upgradeBtn'); if(up) up.addEventListener('click', ()=>{ showUpgradePopup(); });
+}
+
+function closeModal(){ modalRoot.style.display='none'; modalRoot.innerHTML=''; }
+
+function showUpgradePopup(){
+  const modalHtml = `
+    <div class="modal-backdrop" id="upgradeBackdrop">
+      <div class="modal guru-glow">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h2>👑 Become a Dinner Guru</h2>
+          <div class="guru-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2l2.5 5L20 8l-4 3 1 6L12 15l-5 2 1-6L4 8l5.5-.5L12 2z" fill="#1a1a1a"/></svg> Guru</div>
+        </div>
+        <p class="muted">Unlock Dual Mode (Standard + Healthy), exclusive recipes, and an ad-free experience. This demo simulates the upgrade — no payment is processed here.</p>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+          <button class="small" id="cancelUpgrade">Cancel</button>
+          <button class="upgrade-cta" id="confirmUpgrade">Become a Guru</button>
+        </div>
+      </div>
+    </div>
+  `;
+  modalRoot.style.display='block'; modalRoot.innerHTML = modalHtml;
+  document.getElementById('cancelUpgrade').addEventListener('click', closeModal);
+  document.getElementById('confirmUpgrade').addEventListener('click', ()=>{
+    localStorage.setItem('wswhd_guru','1');
+    updateGuruUI();
+    closeModal();
+    alert('Welcome — you are now a Dinner Guru! (Locally enabled in this browser.)');
+  });
+}
+
+function updateGuruUI(){
+  const isGuru = !!localStorage.getItem('wswhd_guru');
+  guruStatusEl.innerHTML = isGuru ? '<div class="guru-badge guru-glow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden><path d="M12 2l2.5 5L20 8l-4 3 1 6L12 15l-5 2 1-6L4 8l5.5-.5L12 2z" fill="#1a1a1a"/></svg> Guru</div>' : '<button class="small" id="beGuru">Become a Guru</button>';
+  const btn = document.getElementById('beGuru'); if(btn) btn.addEventListener('click', showUpgradePopup);
+  // toggle theme
+  if(isGuru){
+    document.documentElement.classList.add('guru-theme');
+    adBanner.style.display='none';
+    // swap icon to guru variant if available
+    const img = document.querySelector('.logo img'); if(img) img.src='icons/guru_icon_192.png';
+  } else {
+    document.documentElement.classList.remove('guru-theme');
+    adBanner.style.display='flex';
+    const img = document.querySelector('.logo img'); if(img) img.src='icons/free_icon_192.png';
+  }
+}
+
+/* -------- TheMealDB Integration (online search) -------- */
+async function searchOnlineRecipes(ingredients){
+  try{
+    const query = encodeURIComponent(ingredients.join(','));
+    const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${query}`);
+    const data = await resp.json();
+    const container = document.getElementById('onlineResults');
+    if(data.meals){
+      // fetch detail for each meal (limit to 10)
+      const meals = data.meals.slice(0,10);
+      const html = [];
+      for(const m of meals){
+        html.push(`<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+          <img src="${m.strMealThumb}" alt="${m.strMeal}" width="80" style="border-radius:8px"/>
+          <div style="flex:1"><strong>${m.strMeal}</strong><div style="margin-top:6px"><button class="small" onclick='getRecipeDetails("${m.idMeal}")'>View Recipe</button></div></div>
+        </div>`);
+      }
+      container.innerHTML = html.join('');
+      // store latest online results to global for detail lookup
+      window.__lastOnlineMeals = meals;
+    } else {
+      container.innerHTML = '<div class="muted">No online recipes found for those ingredients.</div>';
+    }
+  } catch(err){
+    console.error(err);
+    const container = document.getElementById('onlineResults');
+    container.innerHTML = '<div class="muted">Error connecting to TheMealDB. Check your internet connection.</div>';
+  }
+}
+
+async function getRecipeDetails(id){
+  try{
+    const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+    const data = await resp.json();
+    const meal = data.meals[0];
+    openRecipeModal(null, null, meal);
+  } catch(err){
+    alert('Could not fetch recipe details.');
+  }
+}
+
+function extractIngredientsFromMeal(m){
+  const list = [];
+  for(let i=1;i<=20;i++){
+    const ing = m['strIngredient'+i];
+    const meas = m['strMeasure'+i];
+    if(ing && ing.trim()) list.push((meas?meas+' ':'')+ing.trim());
+  }
+  return list;
+}
+
+/* -------- events & init -------- */
+findBtn.addEventListener('click', ()=>{
+  const pantry = normalizeList(ingredientsEl.value);
+  renderRecipes(pantry);
+  if(pantry.length) searchOnlineRecipes(pantry);
+});
+document.getElementById('sampleBtn').addEventListener('click', ()=>{ ingredientsEl.value='eggs, milk, butter, bread, tomato, garlic, pasta'; findBtn.click(); });
+document.getElementById('clearBtn').addEventListener('click', ()=>{ ingredientsEl.value=''; resultsEl.innerHTML=''; });
+
+resultsEl.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(!btn) return; const action = btn.dataset.action; const id = Number(btn.dataset.id); const pantry = normalizeList(ingredientsEl.value); if(action==='view') openRecipeModal(id, pantry); if(action==='fav'){ const favs = loadFavs(); if(!favs.includes(id)) favs.push(id); saveFavs(favs); renderFavs(); btn.innerText='Saved'; } if(action==='addMissing') addMissingToShopping(id, pantry); });
+
+favListEl.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(!btn) return; const id = Number(btn.dataset.id); if(btn.dataset.action==='removeFav'){ const favs = loadFavs().filter(x=>x!==id); saveFavs(favs); renderFavs(); } });
+
+document.getElementById('clearFavs').addEventListener('click', ()=>{ localStorage.removeItem('wswhd_favs'); renderFavs(); });
+document.getElementById('exportList').addEventListener('click', ()=>{ const list = JSON.parse(localStorage.getItem('wswhd_shopping')||'[]'); if(!list.length) return alert('No items to export'); const blob = new Blob([list.join('\n')],{type:'text/plain'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'shopping-list.txt'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+document.getElementById('clearList').addEventListener('click', ()=>{ localStorage.removeItem('wswhd_shopping'); renderShopping(); });
+
+function init(){ renderFavs(); renderShopping(); updateGuruUI(); }
+init();
+
+// service worker registration (best effort)
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistration().then(reg=>{/* noop */}).catch(()=>{});
+}
+</script>
+</body>
+</html>

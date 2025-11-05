@@ -1,0 +1,23 @@
+What Shall We Have for Dinner - Setup Guide
+
+Included files:
+- index.html
+- manifest.webmanifest
+- sw.js
+- icons/ (free + guru icon PNGs)
+
+How to host (Netlify - quick):
+1. Create a free account at https://app.netlify.com/
+2. Drag and drop the ZIP or the site folder into Netlify's Deploy area.
+3. Netlify will provide a public URL. Open that URL on your phone.
+4. On mobile: use the browser menu -> Add to Home screen.
+
+How to host (GitHub Pages):
+1. Create a GitHub repo and push these files to the repo root.
+2. In repo settings -> Pages, set source to the main branch root.
+3. After a few minutes, your site will be available at https://<your-username>.github.io/<repo-name>/
+
+Notes:
+- TheMealDB is used for online recipe search (no API key required).
+- Ads are placeholder elements. To add real ads later, integrate Google AdMob (for native apps) or an ad provider for web banners.
+- To distribute in app stores later, wrap the PWA using Capacitor or use PWABuilder to generate store packages.

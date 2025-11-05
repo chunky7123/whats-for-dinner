@@ -1,0 +1,1 @@
+What Shall We Have for Dinner - PWA package\nOpen index.html or host the folder to use the app.\n
